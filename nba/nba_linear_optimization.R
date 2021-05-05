@@ -1,8 +1,5 @@
 #NBA PLAYER RATING SYSTEM FOR DFS
-# Note: This is the most optimized lineup - DO NOT USE for GPP - CASH (H2H & 50/50) GAMES ONLY 
-#By: Dane Genord 
 
-# setwd('/models')
 
 library(ggplot2)  
 library(hablar) 
@@ -17,9 +14,10 @@ library(googlesheets4)
 library(tidyr)
 library(sqldf)
 
+
 #the-odds-api.com
-odds <- read_sheet("") # add googlesheet link here
-abbrev <-read.csv('./nba_abbrev.csv')
+odds <- read_sheet("https://docs.google.com/spreadsheets/d/1MSLI36-lYuGQFQHLPWASoOikoZoTswPzV6Y58sZ9CTM/edit#gid=0") # add googlesheet link between quotes " " here
+abbrev <-read.csv('./data/nba_abbrev.csv')
 odds <- as.data.frame(odds)
 df <- separate(data = odds, col = event_name, into = c("team1", "team2"), sep = "\\_")
 games1 <- sqldf('select abbrev.abbreviation, df.team1, df.odd_1, df.point_1  from df inner join abbrev on df.team1 = abbrev.[Team.name]')
@@ -32,7 +30,7 @@ gamesum <- sqldf('select abbreviation, team1,  max(point_1) as total
 total <- gamesum %>% mutate_all(~gsub("over ","",.))
 
 #NBA stats per 36 minutes by player
-pm <- "https://www.basketball-reference.com/leagues/NBA_2021_per_minute.html"
+pm <- "https://www.basketball-reference.com/leagues/NBA_2021_per_minute.html" # to expand on this you most likely need more data sources
 url <- pm
 pobj <- read_html(url, as.data.frame=T, stringsAsFactors = TRUE)
 pobj %>%
@@ -58,7 +56,7 @@ pm$rating <- ((pm$mp/pm$g)) * (
 pg <- data.frame(Name = pm$player, Rating = pm$rating, g = pm$g, gs = pm$gs, minutesRating = pm$mp/pm$g)
 
 #fan duel lineup data
-fd <- read.csv('./fd_nba.csv')
+fd <- read.csv('./data/fd_nba.csv')
 
 #join fanduel data to rating system 
 df <- sqldf('select distinct fd.Nickname, fd.Salary, fd.Team, fd.Position, min(pg.Rating+total.total) as Rating, fd.id
